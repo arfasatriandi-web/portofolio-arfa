@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portofolio Spider-Man | Sistem Informasi UNTAN</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans for body legibility & Montserrat for superhero/tech titles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        spideyRed: '#FF1744',
+                        spideyBlue: '#00E5FF',
+                        spideyDark: '#030712',
+                        spideyNavy: '#0A1128',
+                        spideyPurple: '#7C4DFF',
+                    },
+                    fontFamily: {
+                        heading: ['Montserrat', 'sans-serif'],
+                        body: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #030712;
+            color: #F3F4F6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Glassmorphism Card Styling */
+        .glass-card {
+            background: rgba(10, 17, 40, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 23, 68, 0.25);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.9), 0 0 20px rgba(255, 23, 68, 0.15);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(0, 229, 255, 0.6);
+            box-shadow: 0 15px 35px -10px rgba(0, 229, 255, 0.3), 0 0 25px rgba(255, 23, 68, 0.3);
+            transform: translateY(-4px);
+        }
+
+        /* Taskbar Nav Link Animation */
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, #FF1744, #00E5FF);
+            box-shadow: 0 0 12px #FF1744, 0 0 20px #00E5FF;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(-50%);
+            border-radius: 9999px;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .nav-link:hover {
+            color: #00E5FF !important;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.8);
+            transform: translateY(-2px);
+        }
+
+        /* Grayscale to Vibrant Color Photo Transition */
+        .spidey-photo {
+            filter: grayscale(100%) contrast(120%) brightness(90%);
+            transition: filter 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .group:hover .spidey-photo,
+        .group:active .spidey-photo {
+            filter: grayscale(0%) contrast(105%) saturate(140%) brightness(105%);
+            transform: scale(1.06);
+        }
+
+        /* Glowing Text Utilities */
+        .neon-glow-red {
+            text-shadow: 0 0 10px rgba(255, 23, 68, 0.8), 0 0 25px rgba(255, 23, 68, 0.5);
+        }
+
+        .neon-glow-blue {
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.8), 0 0 25px rgba(0, 229, 255, 0.5);
+        }
+
+        /* Pulse Background Glow Keyframes */
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.35; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        .ambient-pulse {
+            animation: pulseGlow 6s ease-in-out infinite;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030712;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(#FF1744, #7C4DFF);
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00E5FF;
+        }
+    </style>
+</head>
+<body class="min-h-screen relative selection:bg-spideyRed selection:text-white">
+
+    <!-- CANVAS BACKGROUND (HIGH VISIBILITY LIVING NEON SPIDER-WEBS & CLICK EFFECTS) -->
+    <canvas id="spideyCanvas" class="fixed inset-0 pointer-events-none z-50 opacity-90"></canvas>
+
+    <!-- AMBIENT COLOR NEON ORBS -->
+    <div class="fixed inset-0 pointer-events-none z-0 flex justify-between items-center overflow-hidden">
+        <div class="w-[600px] h-[600px] bg-spideyRed/25 rounded-full blur-[160px] ambient-pulse -translate-x-1/2"></div>
+        <div class="w-[600px] h-[600px] bg-spideyBlue/20 rounded-full blur-[160px] ambient-pulse translate-x-1/2"></div>
+        <div class="w-[500px] h-[500px] bg-spideyPurple/20 rounded-full blur-[160px] ambient-pulse translate-y-1/2"></div>
+    </div>
+
+    <!-- MAIN PORTAL CONTENT WRAPPER -->
+    <div class="relative z-10 flex flex-col min-h-screen pb-20">
+
+        <!-- HEADER / TASKBAR NAVIGATION -->
+        <header class="fixed top-5 left-1/2 -translate-x-1/2 z-40 w-[94%] max-w-5xl">
+            <nav class="glass-card rounded-full px-6 py-3.5 flex items-center justify-between border border-spideyRed/40 shadow-2xl transition-all duration-300 hover:border-spideyBlue/70">
+                
+                <!-- Logo & Brand -->
+                <a href="#hero" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-full bg-spideyRed/20 border-2 border-spideyRed flex items-center justify-center group-hover:scale-110 group-hover:shadow-[0_0_20px_#FF1744] transition-all duration-300">
+                        <i class="fa-solid fa-spider text-spideyRed text-lg group-hover:text-spideyBlue transition-colors"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-heading font-black text-sm md:text-base text-white tracking-wider group-hover:text-spideyBlue transition-colors">SI<span class="text-spideyRed">.UNTAN</span></span>
+                        <span class="text-[10px] text-slate-400 font-semibold tracking-widest uppercase">Sistem Informasi</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Nav Links -->
+                <div class="hidden md:flex items-center gap-6 text-xs font-bold tracking-wider uppercase">
+                    <a href="#tentang" class="text-slate-200 nav-link py-1">Tentang Saya</a>
+                    <a href="#biodata" class="text-slate-200 nav-link py-1">Biodata</a>
+                    <a href="#pendidikan" class="text-slate-200 nav-link py-1">Pendidikan</a>
+                    <a href="#sosmed" class="text-slate-200 nav-link py-1">Sosial Media</a>
+                </div>
+
+                <!-- Contact CTA Button -->
+                <a href="#sosmed" class="px-5 py-2 rounded-full bg-gradient-to-r from-spideyRed to-spideyPurple hover:from-spideyBlue hover:to-spideyRed text-white text-xs font-heading font-extrabold tracking-wider transition-all duration-300 shadow-lg shadow-spideyRed/40 hover:shadow-spideyBlue/60 hover:scale-105 flex items-center gap-2">
+                    <span>KONTAK</span>
+                    <i class="fa-solid fa-paper-plane text-[10px]"></i>
+                </a>
+            </nav>
+        </header>
+
+        <!-- SECTION 1: HERO COVER -->
+        <section id="hero" class="min-h-screen flex flex-col items-center justify-center pt-28 px-4 text-center relative">
+            <div class="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-spideyRed/15 border border-spideyRed/50 text-spideyRed text-xs font-bold tracking-widest uppercase mb-6 shadow-[0_0_15px_rgba(255,23,68,0.3)] animate-bounce">
+                <i class="fa-solid fa-spider text-spideyBlue"></i> Mahasiswa Sistem Informasi • FMIPA UNTAN
+            </div>
+
+            <h1 class="text-3xl sm:text-5xl md:text-7xl font-heading font-black tracking-tight text-white mb-6 uppercase leading-tight">
+                Muhammad Arfa Satriandi <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-spideyRed via-spideyBlue to-spideyPurple neon-glow-red">
+                    BRAND NEW PROGRAM
+                </span>
+            </h1>
+
+            <p class="max-w-2xl text-slate-300 text-sm md:text-base font-medium leading-relaxed mb-10">
+                Selamat datang di portal pahlawan digital! Saya adalah mahasiswa Sistem Informasi Universitas Tanjungpura Pontianak dengan fokus keahlian pada Analisis Sistem, Pemrograman Web, dan UI/UX Design.
+            </p>
+
+            <div class="flex flex-wrap items-center justify-center gap-4">
+                <a href="#tentang" class="px-8 py-3.5 rounded-xl bg-spideyRed hover:bg-red-600 text-white text-xs font-heading font-bold tracking-widest uppercase transition-all duration-300 shadow-lg shadow-spideyRed/50 hover:shadow-spideyRed/80 hover:scale-105 flex items-center gap-2">
+                    <span>Jelajahi Portofolio</span>
+                    <i class="fa-solid fa-arrow-down"></i>
+                </a>
+                <a href="#sosmed" class="px-8 py-3.5 rounded-xl glass-card border border-spideyBlue/50 text-spideyBlue hover:text-white hover:bg-spideyBlue/20 text-xs font-heading font-bold tracking-widest uppercase transition-all duration-300 shadow-lg hover:scale-105 flex items-center gap-2">
+                    <span>Hubungi Saya</span>
+                    <i class="fa-solid fa-comments"></i>
+                </a>
+            </div>
+        </section>
+
+        <!-- SECTION 2: TENTANG SAYA -->
+        <section id="tentang" class="py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full">
+            <div class="flex items-center gap-3 mb-12">
+                <div class="w-3.5 h-10 bg-spideyRed rounded-full shadow-[0_0_15px_#FF1744]"></div>
+                <h2 class="text-2xl sm:text-4xl font-heading font-black text-white tracking-wide uppercase">TENTANG SAYA</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                
+                <!-- PHOTO FRAME (GRAYSCALE TO COLOR HOVER) -->
+                <div class="lg:col-span-5 flex justify-center">
+                    <div class="relative group w-64 h-80 sm:w-72 sm:h-96 rounded-2xl p-2 glass-card border-2 border-spideyRed/50 transition-all duration-500 hover:border-spideyBlue">
+                        <div class="w-full h-full rounded-xl overflow-hidden relative bg-spideyNavy">
+                            <img id="user-avatar" 
+                                 src="orang gantengb.jpeg" 
+                                 alt="Foto Profil Mahasiswa Sistem Informasi UNTAN" 
+                                 class="w-full h-full object-cover object-center spidey-photo rounded-xl">
+
+                            <!-- Glowing Spider-Sense Frame Border -->
+                            <div class="absolute inset-0 border-2 border-spideyRed/30 group-hover:border-spideyBlue rounded-xl pointer-events-none transition-colors"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DESCRIPTION -->
+                <div class="lg:col-span-7 glass-card rounded-2xl p-8 sm:p-10 space-y-5">
+                    <div class="inline-flex items-center gap-2 text-spideyBlue font-heading text-xs font-bold tracking-widest uppercase">
+                        <i class="fa-solid fa-spider"></i> Profile & Mission
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-heading font-extrabold text-white">
+                        Mahasiswa Sistem Informasi <span class="text-spideyRed">FMIPA UNTAN</span>
+                    </h3>
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                        Muhammad Arfa Satriandi adalah mahasiswa aktif Program Studi <strong class="text-white">Sistem Informasi</strong> di Fakultas Matematika dan Ilmu Pengetahuan Alam (FMIPA), Universitas Tanjungpura. Memiliki dedikasi tinggi dalam memecahkan masalah kompleks melalui perancangan arsitektur sistem, pengelolaan basis data, dan pengembangan web yang intuitif.
+                    </p>
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                        Terinspirasi oleh semangat Spider-Man — <em>"With great power comes great responsibility"</em> — saya berkomitmen untuk menciptakan solusi digital yang dapat diandalkan dan memberikan manfaat nyata bagi masyarakat serta organisasi.
+                    </p>
+
+                    <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-800">
+                        <div>
+                            <span class="text-xs text-slate-400 font-semibold block">PROGRAM STUDI</span>
+                            <span class="text-xs sm:text-sm font-bold text-white">Sistem Informasi</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 font-semibold block">FAKULTAS / KAMPUS</span>
+                            <span class="text-xs sm:text-sm font-bold text-white">FMIPA UNTAN</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 3: BIODATA DIRI (EXPANDED PERSONAL INFORMATION) -->
+        <section id="biodata" class="py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full">
+            <div class="flex items-center gap-3 mb-12">
+                <div class="w-3.5 h-10 bg-spideyBlue rounded-full shadow-[0_0_15px_#00E5FF]"></div>
+                <div>
+                    <h2 class="text-2xl sm:text-4xl font-heading font-black text-white tracking-wide uppercase">BIODATA DIRI</h2>
+                    <p class="text-xs sm:text-sm text-slate-400 font-medium">Informasi pribadi lengkap, latar belakang akademis, hobi, dan minat</p>
+                </div>
+            </div>
+
+            <!-- Full-width Personal Info Glass Card -->
+            <div class="glass-card rounded-2xl p-8 sm:p-10 space-y-8">
+                
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <h3 class="text-lg font-heading font-extrabold text-spideyRed tracking-wider uppercase flex items-center gap-2">
+                        <i class="fa-solid fa-id-card text-spideyRed text-xl"></i> Informasi Personal Detail
+                    </h3>
+                    <span class="text-xs font-bold bg-spideyRed/20 px-4 py-1 rounded-full border border-spideyRed/40 text-spideyRed">
+                        Mahasiswa Aktif
+                    </span>
+                </div>
+
+                <!-- Grid Details (2 Columns) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 text-sm">
+                    <div class="space-y-4">
+                        <div class="border-b border-slate-800/60 pb-3 flex justify-between items-center">
+                            <span class="text-slate-400 font-medium flex items-center gap-2.5">
+                                <i class="fa-solid fa-calendar-day text-spideyBlue"></i> Tempat, Tanggal Lahir
+                            </span>
+                            <span class="text-white font-bold">Sambas, 06 Juni 2008</span>
+                        </div>
+                        <div class="border-b border-slate-800/60 pb-3 flex justify-between items-center">
+                            <span class="text-slate-400 font-medium flex items-center gap-2.5">
+                                <i class="fa-solid fa-graduation-cap text-spideyBlue"></i> Perguruan Tinggi
+                            </span>
+                            <span class="text-white font-bold">Universitas Tanjungpura</span>
+                        </div>
+                        <div class="border-b border-slate-800/60 pb-3 flex justify-between items-center">
+                            <span class="text-slate-400 font-medium flex items-center gap-2.5">
+                                <i class="fa-solid fa-building-columns text-spideyBlue"></i> Fakultas
+                            </span>
+                            <span class="text-white font-bold">MATEMATIKA DAN ILMU PENGETAHUAN ALAM</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="border-b border-slate-800/60 pb-3 flex justify-between items-center">
+                            <span class="text-slate-400 font-medium flex items-center gap-2.5">
+                                <i class="fa-solid fa-laptop-code text-spideyBlue"></i> Program Studi
+                            </span>
+                            <span class="text-white font-bold">Sistem Informasi</span>
+                        </div>
+                        <div class="border-b border-slate-800/60 pb-3 flex justify-between items-start">
+                            <span class="text-slate-400 font-medium flex items-center gap-2.5 shrink-0">
+                                <i class="fa-solid fa-location-dot text-spideyBlue"></i> Alamat Lengkap
+                            </span>
+                            <span class="text-white font-semibold text-right max-w-xs">Jl. Tabrani Ahmad, Pontianak, Kalimantan Barat</span>
+                        </div>
+                        <div class="border-b border-slate-800/60 pb-3 flex justify-between items-center">
+                            <span class="text-slate-400 font-medium flex items-center gap-2.5">
+                                <i class="fa-solid fa-flag text-spideyBlue"></i> Kewarganegaraan
+                            </span>
+                            <span class="text-white font-bold">Indonesia</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hobi & Minat Section -->
+                <div class="pt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-5 rounded-xl bg-spideyNavy/80 border border-spideyBlue/30 space-y-3">
+                        <span class="text-xs font-heading font-extrabold text-spideyBlue uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-gamepad text-sm"></i> Hobi & Minat
+                        </span>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-spideyBlue/15 text-spideyBlue border border-spideyBlue/30 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5">
+                                <i class="fa-solid fa-code text-[10px]"></i> Pemograman Web
+                            </span>
+                            <span class="bg-spideyBlue/15 text-spideyBlue border border-spideyBlue/30 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5">
+                                <i class="fa-solid fa-pen-nib text-[10px]"></i> Desain UI/UX
+                            </span>
+                            <span class="bg-spideyBlue/15 text-spideyBlue border border-spideyBlue/30 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5">
+                                <i class="fa-solid fa-headset text-[10px]"></i> Gaming
+                            </span>
+                            <span class="bg-spideyBlue/15 text-spideyBlue border border-spideyBlue/30 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5">
+                                <i class="fa-solid fa-wrench text-[10px]"></i> Otomotif
+                            </span>
+                            <span class="bg-spideyBlue/15 text-spideyBlue border border-spideyBlue/30 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5">
+                                <i class="fa-solid fa-person-running text-[10px]"></i> Olahraga
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="p-5 rounded-xl bg-spideyNavy/80 border border-spideyRed/30 space-y-3">
+                        <span class="text-xs font-heading font-extrabold text-spideyRed uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-bullseye text-sm"></i> Minat & Eksplorasi Akademis
+                        </span>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-spideyRed/15 text-spideyRed border border-spideyRed/30 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5">
+                                <i class="fa-solid fa-chart-column text-[10px]"></i> Business Analyst
+                            </span>
+                            <span class="bg-spideyRed/15 text-spideyRed border border-spideyRed/30 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5">
+                                <i class="fa-solid fa-shield-halved text-[10px]"></i> Cyber Security
+                            </span>
+                            <span class="bg-spideyRed/15 text-spideyRed border border-spideyRed/30 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5">
+                                <i class="fa-solid fa-globe text-[10px]"></i> Web Engineering
+                            </span>
+                            <span class="bg-spideyRed/15 text-spideyRed border border-spideyRed/30 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5">
+                                <i class="fa-solid fa-robot text-[10px]"></i> AI & Data Science
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Motto Quote Banner -->
+                <div class="p-5 rounded-xl bg-gradient-to-r from-spideyRed/10 via-spideyPurple/10 to-spideyBlue/10 border border-spideyRed/30 text-center relative overflow-hidden">
+                    <p class="text-xs sm:text-sm text-slate-200 italic font-medium">
+                        <i class="fa-solid fa-quote-left text-spideyRed text-base mr-2"></i>
+                        Selalu bersemangat untuk mempelajari teknologi terkini dan mengimplementasikannya dalam proyek nyata.
+                        <i class="fa-solid fa-quote-right text-spideyBlue text-base ml-2"></i>
+                    </p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 4: RIWAYAT PENDIDIKAN (SD, SMP, SMA, S1 WITH PHOTO SLOTS) -->
+        <section id="pendidikan" class="py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full">
+            <div class="flex items-center gap-3 mb-12">
+                <div class="w-3.5 h-10 bg-spideyRed rounded-full shadow-[0_0_15px_#FF1744]"></div>
+                <div>
+                    <h2 class="text-2xl sm:text-4xl font-heading font-black text-white tracking-wide uppercase">RIWAYAT PENDIDIKAN</h2>
+                    <p class="text-xs sm:text-sm text-slate-400 font-medium">Jejak langkah pendidikan dari Sekolah Dasar hingga Perguruan Tinggi</p>
+                </div>
+            </div>
+
+            <!-- EDUCATION CARDS GRID WITH PHOTOS -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <!-- 1. S1 UNTAN -->
+                <div class="glass-card rounded-2xl overflow-hidden border-l-4 border-l-spideyRed group">
+                    <div class="h-48 w-full overflow-hidden relative bg-spideyNavy">
+                        <img src="synergia.jpeg" 
+                             alt="Gedung UNTAN" 
+                             class="w-full h-full object-cover spidey-photo">
+                        <div class="absolute top-3 right-3 bg-spideyRed text-white text-[10px] font-heading font-bold px-3 py-1 rounded-full shadow-lg">
+                            2026 - SEKARANG
+                        </div>
+                    </div>
+                    <div class="p-6 space-y-2">
+                        <span class="text-xs text-spideyBlue font-bold tracking-wider uppercase block">PERGURUAN TINGGI</span>
+                        <h3 class="text-lg font-heading font-extrabold text-white">S1 Sistem Informasi</h3>
+                        <p class="text-xs font-semibold text-slate-300">Universitas Tanjungpura (UNTAN) - FMIPA</p>
+                        <p class="text-xs text-slate-400 leading-relaxed pt-2">
+                            Fokus pada pemrograman web, analisis dan perancangan sistem informasi, manajemen basis data, serta tata kelola teknologi informasi.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 2. SMA -->
+                <div class="glass-card rounded-2xl overflow-hidden border-l-4 border-l-spideyBlue group">
+                    <div class="h-48 w-full overflow-hidden relative bg-spideyNavy">
+                        <img src="ourgeng.jpg" 
+                             alt="Gedung SMA" 
+                             class="w-full h-full object-cover spidey-photo">
+                        <div class="absolute top-3 right-3 bg-spideyBlue text-black text-[10px] font-heading font-bold px-3 py-1 rounded-full shadow-lg">
+                            SEKOLAH MENENGAH ATAS
+                        </div>
+                    </div>
+                    <div class="p-6 space-y-2">
+                        <span class="text-xs text-spideyRed font-bold tracking-wider uppercase block">PENDIDIKAN MENENGAH ATAS</span>
+                        <h3 class="text-lg font-heading font-extrabold text-white">SMA Negeri 1 Sambas</h3>
+                        <p class="text-xs font-semibold text-slate-300">Jurusan IPA / MIPA</p>
+                        <p class="text-xs text-slate-400 leading-relaxed pt-2">
+                            Aktif dalam pelajaran sains terapan, logika matematika, serta pengembangan awal pemikiran analitis.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 3. SMP -->
+                <div class="glass-card rounded-2xl overflow-hidden border-l-4 border-l-spideyPurple group">
+                    <div class="h-48 w-full overflow-hidden relative bg-spideyNavy">
+                        <img src="smp.jpeg" 
+                             alt="Gedung SMP" 
+                             class="w-full h-full object-cover spidey-photo">
+                        <div class="absolute top-3 right-3 bg-spideyPurple text-white text-[10px] font-heading font-bold px-3 py-1 rounded-full shadow-lg">
+                            SEKOLAH MENENGAH PERTAMA
+                        </div>
+                    </div>
+                    <div class="p-6 space-y-2">
+                        <span class="text-xs text-spideyBlue font-bold tracking-wider uppercase block">PENDIDIKAN MENENGAH PERTAMA</span>
+                        <h3 class="text-lg font-heading font-extrabold text-white">SMP Negeri 1 Sambas</h3>
+                        <p class="text-xs font-semibold text-slate-300">Pendidikan Menengah Pertama</p>
+                        <p class="text-xs text-slate-400 leading-relaxed pt-2">
+                            Mengembangkan fondasi akademik, kerja sama tim, serta dasar ilmu pengetahuan umum.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 4. SD -->
+                <div class="glass-card rounded-2xl overflow-hidden border-l-4 border-l-emerald-500 group">
+                    <div class="h-48 w-full overflow-hidden relative bg-spideyNavy">
+                        <img src="sd.jpeg" 
+                             alt="Gedung SD" 
+                             class="w-full h-full object-cover spidey-photo">
+                        <div class="absolute top-3 right-3 bg-emerald-500 text-black text-[10px] font-heading font-bold px-3 py-1 rounded-full shadow-lg">
+                            SEKOLAH DASAR
+                        </div>
+                    </div>
+                    <div class="p-6 space-y-2">
+                        <span class="text-xs text-emerald-400 font-bold tracking-wider uppercase block">PENDIDIKAN DASAR</span>
+                        <h3 class="text-lg font-heading font-extrabold text-white">SD Negeri 1 Mentawa Sambas</h3>
+                        <p class="text-xs font-semibold text-slate-300">Pendidikan Sekolah Dasar</p>
+                        <p class="text-xs text-slate-400 leading-relaxed pt-2">
+                            Awal perjalanan dalam membangun literasi, karakter, dan minat membaca.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 6: SOCIAL MEDIA & KONTAK -->
+        <section id="sosmed" class="py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full">
+            <div class="flex items-center gap-3 mb-12">
+                 <div class="w-3.5 h-10 bg-spideyRed rounded-full shadow-[0_0_15px_#FF1744]"></div>
+                 <div>
+                     <h2 class="text-2xl sm:text-4xl font-heading font-black text-white tracking-wide uppercase">SOSIAL MEDIA & KONTAK</h2>
+                     <p class="text-xs sm:text-sm text-slate-400 font-medium">Klik logo di bawah ini untuk terhubung langsung secara instan</p>
+                </div>
+             </div>
+
+    <!-- SOCIAL MEDIA CARDS WRAPPER (3 ATAS, 2 BAWAH) -->
+    <div class="space-y-6">
+        
+        <!-- BARIS ATAS: 3 KAD -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                
+                <!-- Instagram -->
+                <a href="https://instagram.com/arfastrndii_" target="_blank" rel="noopener noreferrer" 
+                   class="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center group hover:border-pink-500 transition-all duration-300">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 flex items-center justify-center text-3xl text-white mb-4 group-hover:scale-110 shadow-lg group-hover:shadow-pink-500/50 transition-all">
+                        <i class="fa-brands fa-instagram"></i>
+                    </div>
+                    <span class="text-sm font-heading font-bold text-white group-hover:text-pink-400 transition-colors">INSTAGRAM</span>
+                    <span class="text-[11px] text-slate-400 font-medium mt-1">@arfastrndii_</span>
+                </a>
+
+                <!-- TikTok -->
+                <a href="https://tiktok.com/@mhd_arfaaa" target="_blank" rel="noopener noreferrer" 
+                class="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center group hover:border-spideyRed transition-all duration-300">
+                    <div class="w-16 h-16 rounded-2xl bg-black border border-slate-700 flex items-center justify-center text-3xl text-white mb-4 group-hover:scale-110 shadow-lg group-hover:shadow-spideyRed/50 transition-all">
+                        <i class="fa-brands fa-tiktok"></i>
+                    </div>
+                    <span class="text-sm font-heading font-bold text-white group-hover:text-spideyRed transition-colors">TIKTOK</span>
+                    <span class="text-[11px] text-slate-400 font-medium mt-1">@mhd_arfaaa</span>
+                </a>
+
+                <!-- WhatsApp -->
+                <a href="https://wa.me/62895373734472" target="_blank" rel="noopener noreferrer" 
+                   class="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center group hover:border-emerald-500 transition-all duration-300">
+                    <div class="w-16 h-16 rounded-2xl bg-emerald-500 flex items-center justify-center text-3xl text-white mb-4 group-hover:scale-110 shadow-lg group-hover:shadow-emerald-500/50 transition-all">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                    <span class="text-sm font-heading font-bold text-white group-hover:text-emerald-400 transition-colors">WHATSAPP</span>
+                    <span class="text-[11px] text-slate-400 font-medium mt-1">Kirim Pesan</span>
+                </a>
+
+            </div>
+
+            <!-- BARIS BAWAH: 2 KAD (SEIMBANG DI TENGAH) -->
+             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
+
+                <!-- GitHub -->
+                <a href="https://github.com/arfasatriandi-web" target="_blank" rel="noopener noreferrer" 
+                   class="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center group hover:border-spideyBlue transition-all duration-300">
+                    <div class="w-16 h-16 rounded-2xl bg-slate-800 border border-slate-600 flex items-center justify-center text-3xl text-white mb-4 group-hover:scale-110 shadow-lg group-hover:shadow-spideyBlue/50 transition-all">
+                        <i class="fa-brands fa-github"></i>
+                    </div>
+                    <span class="text-sm font-heading font-bold text-white group-hover:text-spideyBlue transition-colors">GITHUB</span>
+                    <span class="text-[11px] text-slate-400 font-medium mt-1">Repository</span>
+                </a>
+
+                <!-- Email -->
+                <!-- Link langsung ke Compose Web Gmail -->
+                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=arfasatriandi@gmail.com" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    class="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center group hover:border-spideyRed transition-all duration-300">
+                    <div class="w-16 h-16 rounded-2xl bg-spideyRed flex items-center justify-center text-3xl text-white mb-4 group-hover:scale-110 shadow-lg group-hover:shadow-spideyRed/50 transition-all">
+                         <i class="fa-solid fa-envelope"></i>
+                    </div>
+                    <span class="text-sm font-heading font-bold text-white group-hover:text-spideyRed transition-colors">EMAIL</span>
+                    <span class="text-[11px] text-slate-400 font-medium mt-1">arfasatriandi@gmail.com</span>
+                </a>
+
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="mt-auto py-8 text-center text-xs text-slate-500 border-t border-slate-900 font-medium">
+            <p>© <span id="year"></span> Sistem Informasi FMIPA UNTAN — Spider-Man Theme Portfolio</p>
+        </footer>
+
+    </div>
+
+    <!-- CANVAS ANIMATION SCRIPT (LIVING NEON BACKGROUND + ULTRA-SMOOTH ORGANIC SPIDER-WEB CLICK BURST) -->
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        const canvas = document.getElementById('spideyCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let time = 0;
+
+        // Floating Spider Particles
+        const particles = [];
+        const particleCount = 35;
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 2.5 + 1,
+                color: i % 2 === 0 ? '#FF1744' : '#00E5FF',
+                vx: (Math.random() - 0.5) * 0.6,
+                vy: (Math.random() - 0.5) * 0.6
+            });
+        }
+
+        // Active Organic Click Web Bursts
+        const clickWebs = [];
+
+        // Smooth Organic Click Event
+        window.addEventListener('click', (e) => {
+            const colors = ['#FF1744', '#00E5FF', '#7C4DFF'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const spokes = Math.floor(Math.random() * 3) + 8; // 8-10 radial spokes
+            
+            // Random offset angles for natural organic look
+            const spokeOffsets = [];
+            for (let i = 0; i < spokes; i++) {
+                spokeOffsets.push((Math.random() - 0.5) * 0.2);
+            }
+
+            // Sparkle particles shooting outward on click
+            const sparkles = [];
+            for (let i = 0; i < 16; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 4 + 2;
+                sparkles.push({
+                    x: e.clientX,
+                    y: e.clientY,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    radius: Math.random() * 2 + 1,
+                    alpha: 1
+                });
+            }
+
+            clickWebs.push({
+                x: e.clientX,
+                y: e.clientY,
+                targetRadius: Math.random() * 50 + 90,
+                currentRadius: 0,
+                spokes: spokes,
+                spokeOffsets: spokeOffsets,
+                rings: 4,
+                color: color,
+                opacity: 1,
+                rotation: Math.random() * Math.PI,
+                rotationSpeed: (Math.random() - 0.5) * 0.02,
+                sparkles: sparkles
+            });
+        });
+
+        function drawLivingBackground() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            time += 0.015;
+
+            // 1. Draw Background Web Hubs
+            const webHubs = [
+                { x: canvas.width * 0.12, y: canvas.height * 0.2, size: 200, color: '#FF1744' },
+                { x: canvas.width * 0.88, y: canvas.height * 0.35, size: 240, color: '#00E5FF' },
+                { x: canvas.width * 0.5, y: canvas.height * 0.8, size: 280, color: '#7C4DFF' }
+            ];
+
+            webHubs.forEach((hub) => {
+                const spokes = 12;
+                const rings = 6;
+                const pulse = Math.sin(time + hub.size) * 0.12 + 1;
+                const currentSize = hub.size * pulse;
+
+                for (let i = 0; i < spokes; i++) {
+                    const angle = (i * Math.PI * 2) / spokes + Math.sin(time * 0.4) * 0.04;
+                    const xEnd = hub.x + Math.cos(angle) * currentSize;
+                    const yEnd = hub.y + Math.sin(angle) * currentSize;
+
+                    ctx.beginPath();
+                    ctx.moveTo(hub.x, hub.y);
+                    ctx.lineTo(xEnd, yEnd);
+                    ctx.strokeStyle = hub.color;
+                    ctx.lineWidth = 1;
+                    ctx.globalAlpha = 0.35;
+                    ctx.stroke();
+                }
+
+                for (let r = 1; r <= rings; r++) {
+                    const radius = (currentSize / rings) * r;
+                    ctx.beginPath();
+                    for (let i = 0; i <= spokes; i++) {
+                        const angle = (i * Math.PI * 2) / spokes + Math.sin(time * 0.4) * 0.04;
+                        const x = hub.x + Math.cos(angle) * radius;
+                        const y = hub.y + Math.sin(angle) * radius;
+
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.strokeStyle = hub.color;
+                    ctx.lineWidth = 0.8;
+                    ctx.globalAlpha = 0.25 + (r / rings) * 0.15;
+                    ctx.stroke();
+                }
+            });
+
+            // 2. Draw Ultra-Smooth Curved Click Spider-Web Bursts
+            for (let k = clickWebs.length - 1; k >= 0; k--) {
+                const web = clickWebs[k];
+
+                // Smooth Ease-Out Expansion
+                web.currentRadius += (web.targetRadius - web.currentRadius) * 0.12;
+                web.rotation += web.rotationSpeed;
+
+                if (Math.abs(web.targetRadius - web.currentRadius) < 1) {
+                    web.opacity -= 0.018; // Gradual fade
+                }
+
+                if (web.opacity <= 0) {
+                    clickWebs.splice(k, 1);
+                    continue;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = web.opacity;
+
+                // Draw Sparkles
+                web.sparkles.forEach((s) => {
+                    s.x += s.vx;
+                    s.y += s.vy;
+                    s.alpha -= 0.02;
+                    if (s.alpha > 0) {
+                        ctx.beginPath();
+                        ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+                        ctx.fillStyle = web.color;
+                        ctx.globalAlpha = s.alpha * web.opacity;
+                        ctx.fill();
+                    }
+                });
+
+                ctx.globalAlpha = web.opacity;
+
+                // Spokes positions
+                const spokePoints = [];
+                for (let i = 0; i < web.spokes; i++) {
+                    const angle = (i * Math.PI * 2) / web.spokes + web.spokeOffsets[i] + web.rotation;
+                    const xEnd = web.x + Math.cos(angle) * web.currentRadius;
+                    const yEnd = web.y + Math.sin(angle) * web.currentRadius;
+                    spokePoints.push({ x: xEnd, y: yEnd, angle: angle });
+
+                    // Draw Smooth Spokes
+                    ctx.beginPath();
+                    ctx.moveTo(web.x, web.y);
+                    ctx.lineTo(xEnd, yEnd);
+                    ctx.strokeStyle = web.color;
+                    ctx.lineWidth = 1.2;
+                    ctx.shadowColor = web.color;
+                    ctx.shadowBlur = 12;
+                    ctx.stroke();
+                }
+
+                // Draw Curved Organic Spiral Rings (Quadratic Bezier Curves)
+                for (let r = 1; r <= web.rings; r++) {
+                    const ratio = r / web.rings;
+                    ctx.beginPath();
+
+                    for (let i = 0; i < web.spokes; i++) {
+                        const curr = spokePoints[i];
+                        const next = spokePoints[(i + 1) % web.spokes];
+
+                        const p1x = web.x + (curr.x - web.x) * ratio;
+                        const p1y = web.y + (curr.y - web.y) * ratio;
+
+                        const p2x = web.x + (next.x - web.x) * ratio;
+                        const p2y = web.y + (next.y - web.y) * ratio;
+
+                        // Midpoint pulled slightly inward for smooth web sag
+                        const midAngle = (curr.angle + next.angle) / 2;
+                        const midRadius = web.currentRadius * ratio * 0.88;
+                        const ctrlX = web.x + Math.cos(midAngle) * midRadius;
+                        const ctrlY = web.y + Math.sin(midAngle) * midRadius;
+
+                        if (i === 0) ctx.moveTo(p1x, p1y);
+                        ctx.quadraticCurveTo(ctrlX, ctrlY, p2x, p2y);
+                    }
+
+                    ctx.strokeStyle = web.color;
+                    ctx.lineWidth = 1;
+                    ctx.shadowColor = web.color;
+                    ctx.shadowBlur = 8;
+                    ctx.stroke();
+                }
+
+                ctx.restore();
+            }
+
+            // 3. Draw Floating Energy Particles
+            for (let i = 0; i < particles.length; i++) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = 0.8;
+                ctx.fill();
+
+                for (let j = i + 1; j < particles.length; j++) {
+                    let p2 = particles[j];
+                    let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                    if (dist < 140) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = p.color;
+                        ctx.lineWidth = 0.7;
+                        ctx.globalAlpha = 0.3 * (1 - dist / 140);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            requestAnimationFrame(drawLivingBackground);
+        }
+
+        drawLivingBackground();
+    </script>
+</body>
+</html>
